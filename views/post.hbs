@@ -1,0 +1,124 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{post.user.username}}'s Post</title>
+  <!-- ... other head elements ... -->
+  <style>
+    .reply-comment-item {
+      margin-left: 20px;
+      border-left: 2px solid #ccc;
+      padding-left: 10px;
+      color: #444;
+    }
+    .edit-form {
+      display: none;
+    }
+    .comment-actions button {
+      display: inline-block; /* Muestra los botones en línea */
+      margin-right: 5px; /* Espacio entre los botones */
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <article class="post">
+      <header>
+        <h1>{{post.user.username}}'s Post</h1>
+        <p>Publicado el {{post.createdAt}}</p>
+      </header>
+      <p>{{post.body}}</p>
+      <!-- ... other post details ... -->
+    </article>
+
+    <section id="comments">
+  <h2>Comentarios</h2>
+  {{#if post.comments}}
+    <ul>
+      {{#each post.comments}}
+        <li class="{{#if this.parentId}}reply-comment-item{{/if}}">
+          {{this.user.username}}: {{this.body}}
+          {{#if this.imageUrl}}
+            <img src="{{this.imageUrl}}" alt="Comment image" style="max-width: 100px; max-height: 100px;">
+          {{/if}}
+          <!-- Botón para responder al comentario -->
+          <button class="reply-comment" data-comment-id="{{this.id}}">Responder</button>
+          <!-- Botón para editar el comentario -->
+          <button class="edit-comment" data-comment-id="{{this.id}}">Editar</button>
+          <!-- Botón para eliminar el comentario, ahora justo después del botón de editar -->
+          <button class="delete-comment" data-comment-id="{{this.id}}">Eliminar</button>
+          
+          <div class="reply-form" id="reply-form-{{this.id}}" style="display:none;">
+            <form action="/comments/comment/{{this.id}}/reply" method="POST">
+              <textarea name="reply" placeholder="Responder a este comentario..." required></textarea>
+              <button type="submit">Enviar Respuesta</button>
+            </form>
+          </div>
+          <div class="edit-form" id="edit-form-{{this.id}}" style="display:none;">
+            <form action="/comments/comment/{{this.id}}/edit" method="POST">
+              <textarea name="editedComment" required>{{this.body}}</textarea>
+              <button type="submit">Guardar Cambios</button>
+            </form>
+          </div>
+        </li>
+      {{/each}}
+    </ul>
+  {{else}}
+    <p>Sé el primero en comentar.</p>
+  {{/if}}
+</section>
+
+
+    <form action="/comments/post/{{post.id}}/comment" method="POST" enctype="multipart/form-data">
+
+      <textarea name="comment" placeholder="Añade un comentario..." required></textarea>
+      <input type="file" name="image" accept="image/*">
+      <button type="submit">Enviar Comentario</button>
+    </form>
+  </main>
+  <script>
+    document.querySelectorAll('.reply-comment').forEach(button => {
+      button.addEventListener('click', function() {
+        const commentId = this.getAttribute('data-comment-id');
+        document.getElementById(`reply-form-${commentId}`).style.display = 'block';
+      });
+    });
+
+    document.querySelectorAll('.edit-comment').forEach(button => {
+      button.addEventListener('click', function() {
+        const commentId = this.getAttribute('data-comment-id');
+        document.getElementById(`edit-form-${commentId}`).style.display = 'block';
+      });
+    });
+     // Función y manejador para eliminar comentarios
+    document.querySelectorAll('.delete-comment').forEach(button => {
+      button.addEventListener('click', function() {
+        const commentId = this.getAttribute('data-comment-id');
+        if (confirm('¿Estás seguro de que quieres eliminar este comentario?')) {
+          deleteComment(commentId);
+        }
+      });
+    });
+
+    function deleteComment(commentId) {
+      // Cambia la ruta de acuerdo a tu configuración del servidor para eliminar comentarios
+      fetch(`/comments/comment/${commentId}/delete`, { 
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          // Agrega cualquier encabezado de autenticación si es necesario
+        },
+        credentials: 'same-origin'
+      })
+      .then(response => {
+        if (response.ok) {
+          // Elimina el comentario del DOM o recarga la página
+          location.reload(); // Esto recargará la página, quitando el comentario eliminado
+        } else {
+          console.error('Error al eliminar el comentario');
+        }
+      })
+      .catch(error => console.error('Error:', error));
+    }
+  </script>
+</body>
+</html> 
