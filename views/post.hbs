@@ -25,9 +25,17 @@
       <header>
         <h1>{{post.user.username}}'s Post</h1>
         <p>Publicado el {{post.createdAt}}</p>
+         <!-- Botón para editar el post principal -->
+        <button class="edit-post" data-post-id="{{post.id}}">Editar Post</button>
       </header>
       <p>{{post.body}}</p>
       <!-- ... other post details ... -->
+      <!-- Formulario para editar el post principal -->
+      <div class="edit-form" id="edit-post-form" style="display:none;">
+        <form action="/forum/post/{{post.id}}/edit" method="POST">
+          <textarea name="editedPost" required>{{post.body}}</textarea>
+          <button type="submit">Guardar Cambios</button>
+        </form>
     </article>
 
     <section id="comments">
@@ -119,6 +127,11 @@
       })
       .catch(error => console.error('Error:', error));
     }
+// Manjeador de evento para editar el post principal
+    document.querySelector('.edit-post').addEventListener('click', function() {
+      document.getElementById('edit-post-form').style.display = 'block';
+    });
+
   </script>
 </body>
 </html> 

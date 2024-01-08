@@ -120,6 +120,39 @@ router.post('/post/:id/delete', isAuthenticated, async (req, res) => {
   }
 });
 
+// Edit a post
+router.post('/post/:id/edit', isAuthenticated, async (req, res) => {
+  const postId = req.params.id;
+  const { editedPost } = req.body;
+  const userId = req.user.id; // The ID of the user requesting the edit
+
+  try {
+    // Retrieve the post to check if the current user is the owner
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+    });
+
+    if (!post) {
+      return res.status(404).send("Post not found");
+    }
+
+    // Optional: Check if the user is the owner of the post
+    if (post.userId !== userId /* && !req.user.isAdmin */) {
+      return res.status(403).send("You do not have permission to edit this post");
+    }
+
+    // Update the post with the new content
+    await prisma.post.update({
+      where: { id: postId },
+      data: { body: editedPost },
+    });
+
+    res.redirect(`/forum/post/${postId}`);
+  } catch (error) {
+    console.error("Error editing post:", error);
+    res.status(500).send("Error al editar el post.");
+  }
+});
 
 
 
