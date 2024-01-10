@@ -27,6 +27,42 @@ router.get('/', async (req, res) => {
   }
 });
 
+
+/**
+ * @swagger
+ * /create-post:
+ *   post:
+ *     summary: Create a new post
+ *     description: Allows a user to create a new post with a body and a frustration level.
+ *     tags: [Posts]
+ *     security:
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - body
+ *               - frustrationLevel
+ *             properties:
+ *               body:
+ *                 type: string
+ *                 description: Content of the post
+ *               frustrationLevel:
+ *                 type: integer
+ *                 description: Level of frustration from 1 to 10
+ *     responses:
+ *       302:
+ *         description: Redirects to the forum page after successful creation of the post
+ *       400:
+ *         description: Bad request if the frustration level is not a number
+ *       401:
+ *         description: Unauthorized if the user is not logged in
+ *       500:
+ *         description: Internal server error if the post cannot be created
+ */
+//create-post
 router.post('/create-post', isAuthenticated, async (req, res) => {
   const { body } = req.body;
   let { frustrationLevel } = req.body;
@@ -54,6 +90,34 @@ router.post('/create-post', isAuthenticated, async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /post/{id}:
+ *   get:
+ *     summary: Retrieve a specific post
+ *     description: Get a single post by its ID along with the author and comments.
+ *     tags: [Posts]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Unique identifier of the post
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: A single post with author and comments.
+ *         content:
+ *           text/html:
+ *             schema:
+ *               type: string
+ *               description: HTML page with the post details
+ *       404:
+ *         description: Post not found
+ *       500:
+ *         description: Internal Server Error
+ */
+//Recuperar y mostrar un post individual basado en su ID.
 router.get('/post/:id', async (req, res) => {
   const postId = req.params.id;
   try {
@@ -80,9 +144,31 @@ router.get('/post/:id', async (req, res) => {
   }
 });
 
-
-
-
+/**
+ * @swagger
+ * /post/{id}/delete:
+ *   post:
+ *     summary: Delete a specific post
+ *     description: Deletes a post by its ID, if the authenticated user is the owner of the post.
+ *     tags: [Posts]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Unique identifier of the post to be deleted
+ *         schema:
+ *           type: string
+ *     security:
+ *     responses:
+ *       302:
+ *         description: Redirects to the forum page after successful deletion of the post
+ *       403:
+ *         description: Forbidden if the user is not the owner of the post
+ *       404:
+ *         description: Post not found
+ *       500:
+ *         description: Internal Server Error if there was a problem deleting the post
+ */
 // Delete a post
 router.post('/post/:id/delete', isAuthenticated, async (req, res) => {
   const postId = req.params.id;
@@ -119,6 +205,42 @@ router.post('/post/:id/delete', isAuthenticated, async (req, res) => {
     res.status(500).send("Error al eliminar el post.");
   }
 });
+
+/**
+ * @swagger
+ * /post/{id}/edit:
+ *   post:
+ *     summary: Edit a specific post
+ *     description: Allows the owner of the post to edit its content.
+ *     tags: [Posts]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Unique identifier of the post to be edited
+ *         schema:
+ *           type: string
+ *     security:
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/x-www-form-urlencoded:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               editedPost:
+ *                 type: string
+ *                 description: The new content of the post
+ *     responses:
+ *       302:
+ *         description: Redirects to the updated post page after successful edit
+ *       403:
+ *         description: Forbidden if the user is not the owner of the post
+ *       404:
+ *         description: Post not found if the post with the given ID does not exist
+ *       500:
+ *         description: Internal Server Error if there was a problem editing the post
+ */
 
 // Edit a post
 router.post('/post/:id/edit', isAuthenticated, async (req, res) => {

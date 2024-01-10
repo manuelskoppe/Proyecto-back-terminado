@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -10,12 +11,28 @@
       padding-left: 10px;
       color: #444;
     }
-    .edit-form {
+    .edit-form, #edit-post-form {
       display: none;
     }
     .comment-actions button {
       display: inline-block; /* Muestra los botones en línea */
       margin-right: 5px; /* Espacio entre los botones */
+    }
+    /* New style for post content */
+    .post-content {
+      margin-bottom: 20px;
+      padding: 10px;
+      background-color: #f8f8f8;
+      border-left: 4px solid #ccc;
+    }
+    .post-content strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 1.1em;
+    }
+    .edit-post {
+      display: block;
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -25,17 +42,24 @@
       <header>
         <h1>{{post.user.username}}'s Post</h1>
         <p>Publicado el {{post.createdAt}}</p>
-         <!-- Botón para editar el post principal -->
-        <button class="edit-post" data-post-id="{{post.id}}">Editar Post</button>
       </header>
-      <p>{{post.body}}</p>
-      <!-- ... other post details ... -->
+
+      <!-- New div for post content with a clear label -->
+      <div class="post-content">
+        <strong>Contenido del post: {{post.user.username}}</strong>
+        <p>{{post.body}}</p>
+      </div>
+
+      <!-- Button to edit the main post, moved below the post content -->
+      <button class="edit-post" data-post-id="{{post.id}}">Editar Post</button>
+      
       <!-- Formulario para editar el post principal -->
-      <div class="edit-form" id="edit-post-form" style="display:none;">
+      <div class="edit-form" id="edit-post-form">
         <form action="/forum/post/{{post.id}}/edit" method="POST">
           <textarea name="editedPost" required>{{post.body}}</textarea>
           <button type="submit">Guardar Cambios</button>
         </form>
+      </div>
     </article>
 
     <section id="comments">

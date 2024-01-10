@@ -7,6 +7,46 @@ const multer = require('multer');
 const upload = multer({ dest: 'uploads/' }); // Configuración temporal de almacenamiento
 const cloudinary = require('../config/cloudinary'); // Importa la configuración de Cloudinary
 
+/**
+ * @swagger
+ * /post/{id}/comment:
+ *   post:
+ *     summary: Post a comment on an individual post
+ *     description: Allows an authenticated user to post a comment on a specific post, with an optional image.
+ *     tags: [Comments]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Unique identifier of the post to comment on
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               comment:
+ *                 type: string
+ *                 description: The text of the comment
+ *                 required: true
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *                 description: An optional image file to upload with the comment
+ *     responses:
+ *       302:
+ *         description: Redirects to the individual post page after successful comment posting
+ *       400:
+ *         description: Bad request if the comment text is missing
+ *       401:
+ *         description: Unauthorized if the user is not logged in
+ *       500:
+ *         description: Internal Server Error if there was a problem posting the comment
+ */
+
 // Ruta para publicar un comentario en un post individual con una imagen opcional
 router.post('/post/:id/comment', isAuthenticated, upload.single('image'), async (req, res) => {
   const postId = req.params.id;
@@ -45,6 +85,28 @@ router.post('/post/:id/comment', isAuthenticated, upload.single('image'), async 
   }
 });
 
+/**
+ * @swagger
+ * /comment/{commentId}/delete:
+ *   post:
+ *     summary: Delete a specific comment
+ *     description: Allows an authenticated user to delete a specific comment.
+ *     tags: [Comments]
+ *     parameters:
+ *       - in: path
+ *         name: commentId
+ *         required: true
+ *         description: Unique identifier of the comment to be deleted
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Comment successfully deleted
+ *       401:
+ *         description: Unauthorized if the user is not logged in
+ *       500:
+ *         description: Internal Server Error if there was a problem deleting the comment
+ */
 // Ruta para eliminar un comentario
 router.post('/comment/:commentId/delete', isAuthenticated, async (req, res) => {
   const commentId = req.params.commentId;
@@ -61,6 +123,39 @@ router.post('/comment/:commentId/delete', isAuthenticated, async (req, res) => {
     res.sendStatus(500);
   }
 });
+/**
+ * @swagger
+ * /comment/{commentId}/reply:
+ *   post:
+ *     summary: Reply to a specific comment
+ *     description: Allows an authenticated user to reply to a specific comment.
+ *     tags: [Comments]
+ *     parameters:
+ *       - in: path
+ *         name: commentId
+ *         required: true
+ *         description: Unique identifier of the parent comment to reply to
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               reply:
+ *                 type: string
+ *                 description: The text of the reply
+ *                 required: true
+ *     responses:
+ *       302:
+ *         description: Redirects back to the original post after successful reply posting
+ *       401:
+ *         description: Unauthorized if the user is not logged in
+ *       500:
+ *         description: Internal Server Error if there was a problem posting the reply
+ */
 
 // Ruta para responder a un comentario
 router.post('/comment/:commentId/reply', isAuthenticated, async (req, res) => {
@@ -91,6 +186,38 @@ router.post('/comment/:commentId/reply', isAuthenticated, async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /comment/{commentId}/edit:
+ *   post:
+ *     summary: Edit a specific comment
+ *     description: Allows the author of a comment to edit it.
+ *     tags: [Comments]
+ *     parameters:
+ *       - in: path
+ *         name: commentId
+ *         required: true
+ *         description: Unique identifier of the comment to be edited
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               editedComment:
+ *                 type: string
+ *                 description: The edited text of the comment
+ *     responses:
+ *       302:
+ *         description: Redirects back to the original post after successful comment editing
+ *       403:
+ *         description: Forbidden if the user is not the author of the comment
+ *       500:
+ *         description: Internal Server Error if there was a problem editing the comment
+ */
 
 // Ruta para editar un comentario
 router.post('/comment/:commentId/edit', isAuthenticated, async (req, res) => {
