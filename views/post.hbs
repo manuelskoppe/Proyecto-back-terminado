@@ -79,11 +79,15 @@
           <!-- Botón para eliminar el comentario, ahora justo después del botón de editar -->
           <button class="delete-comment" data-comment-id="{{this.id}}">Eliminar</button>
           
-          <div class="reply-form" id="reply-form-{{this.id}}" style="display:none;">
-            <form action="/comments/comment/{{this.id}}/reply" method="POST">
-              <textarea name="reply" placeholder="Responder a este comentario..." required></textarea>
-              <button type="submit">Enviar Respuesta</button>
-            </form>
+       <div class="reply-form" id="reply-form-{{this.id}}" style="display:none;">
+  <form action="/comments/comment/{{this.id}}/reply" method="POST" enctype="multipart/form-data">
+    <textarea name="reply" placeholder="Responder a este comentario..." required></textarea>
+    <!-- Campo para subir imagen -->
+    <input type="file" name="replyImage" accept="image/*">
+    <button type="submit">Enviar Respuesta</button>
+  </form>
+</div>
+
           </div>
           <div class="edit-form" id="edit-form-{{this.id}}" style="display:none;">
             <form action="/comments/comment/{{this.id}}/edit" method="POST">

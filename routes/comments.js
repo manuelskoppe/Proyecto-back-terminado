@@ -158,33 +158,51 @@ router.post('/comment/:commentId/delete', isAuthenticated, async (req, res) => {
  */
 
 // Ruta para responder a un comentario
-router.post('/comment/:commentId/reply', isAuthenticated, async (req, res) => {
-  const parentCommentId = req.params.commentId; // El ID del comentario padre
+// Asegúrate de tener 'upload' y 'cloudinary' configurados como en tu otra ruta
+router.post('/comment/:commentId/reply', isAuthenticated, upload.single('replyImage'), async (req, res) => {
+  const parentCommentId = req.params.commentId;
   const { reply } = req.body; // El texto de la respuesta
   const userId = req.user.id; // El ID del usuario que responde
+  const replyImageFile = req.file; // El archivo de imagen para la respuesta
+
+  console.log("Archivo recibido para respuesta:", replyImageFile);
 
   try {
-    // Encuentra el post original asociado con el comentario padre
+    let replyImageUrl = null;
+    if (replyImageFile) {
+      console.log("Subiendo imagen de respuesta a Cloudinary...");
+      const result = await cloudinary.uploader.upload(replyImageFile.path);
+      replyImageUrl = result.secure_url;
+      console.log("Imagen de respuesta subida a Cloudinary, URL:", replyImageUrl);
+    } else {
+      console.log("No se ha proporcionado ninguna imagen para la respuesta.");
+    }
+
+    // Encuentra el comentario padre
     const parentComment = await prisma.comment.findUnique({
       where: { id: parentCommentId },
     });
     const postId = parentComment.postId;
 
-    // Crea la respuesta en la base de datos
+    // Crea la respuesta en la base de datos con o sin URL de imagen
+    console.log("Creando respuesta en la base de datos...");
     await prisma.comment.create({
       data: {
         body: reply,
         parentId: parentCommentId,
         userId: userId,
-        postId: postId, // Incluye el ID del post aquí
+        postId: postId,
+        imageUrl: replyImageUrl // URL de la imagen de la respuesta (puede ser null si no se proporcionó imagen)
       },
     });
-    res.redirect('back'); // Redirige de vuelta al post original
+    console.log("Respuesta creada con éxito.");
+    res.redirect('back'); // O redirige a la ubicación que prefieras
   } catch (error) {
     console.error("Error posting reply:", error);
     res.status(500).send("Error al publicar la respuesta.");
   }
 });
+
 
 /**
  * @swagger
