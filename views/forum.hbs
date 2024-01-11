@@ -37,11 +37,13 @@
 
     </section>
 
-    <form action="/forum/create-post" method="POST">
-      <textarea name="body" placeholder="Escribe tu post aquí..." required></textarea>
-      <input type="number" name="frustrationLevel" placeholder="Nivel de frustración (1-10)" required min="1" max="10">
-      <button type="submit">Publicar Post</button>
-    </form>
+  <form action="/forum/create-post" method="POST" enctype="multipart/form-data">
+  <textarea name="body" placeholder="Escribe tu post aquí..." required></textarea>
+  <input type="number" name="frustrationLevel" placeholder="Nivel de frustración (1-10)" required min="1" max="10">
+  <input type="file" name="image" accept="image/png, image/jpeg">
+  <button type="submit">Publicar Post</button>
+</form>
+
   </main>
 
 </body>

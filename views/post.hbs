@@ -45,10 +45,15 @@
       </header>
 
       <!-- New div for post content with a clear label -->
-      <div class="post-content">
-        <strong>Contenido del post: {{post.user.username}}</strong>
-        <p>{{post.body}}</p>
-      </div>
+<div class="post-content">
+  <strong>Contenido del post: {{post.user.username}}</strong>
+  <p>{{post.body}}</p>
+  <!-- Check if there is an imageUrl and display it -->
+  {{#if post.imageUrl}}
+    <img src="{{post.imageUrl}}" alt="Imagen del post" />
+  {{/if}}
+</div>
+
 
       <!-- Button to edit the main post, moved below the post content -->
       <button class="edit-post" data-post-id="{{post.id}}">Editar Post</button>

@@ -4,6 +4,9 @@ const bcrypt = require("bcrypt");
 const router = express.Router();
 const passport = require("passport");
 const prisma = require("../prisma");
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' }); // Configuración temporal de almacenamiento
+const cloudinary = require('../config/cloudinary'); // Importa la configuración de Cloudinary
 
 // Uncomment the isAuthenticated middleware definition or ensure it is imported if defined in another file.
 const isAuthenticated = (req, res, next) => {
@@ -63,26 +66,35 @@ router.get('/', async (req, res) => {
  *         description: Internal server error if the post cannot be created
  */
 //create-post
-router.post('/create-post', isAuthenticated, async (req, res) => {
-  const { body } = req.body;
-  let { frustrationLevel } = req.body;
+router.post('/create-post', isAuthenticated, upload.single('image'), async (req, res) => {
+  const { body, frustrationLevel } = req.body;
   const userId = req.user.id;
 
-  // Convert frustrationLevel to a number and ensure it's not NaN
-  frustrationLevel = parseInt(frustrationLevel, 10);
-  if (isNaN(frustrationLevel)) {
-    // Handle the error appropriately
+  // Convertir frustrationLevel a un número y asegurarse de que no sea NaN
+  const frustrationLevelNumber = parseInt(frustrationLevel, 10);
+  if (isNaN(frustrationLevelNumber)) {
+    // Manejar el error de manera apropiada
     return res.status(400).send("Nivel de frustración debe ser un número.");
   }
 
   try {
+    // Subir la imagen a Cloudinary, si hay una imagen en la solicitud
+    let imageUrl = '';
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path);
+      imageUrl = result.secure_url;
+    }
+
+    // Crear el post con la URL de la imagen, si existe
     const newPost = await prisma.post.create({
       data: {
         body: body,
-        frustrationLevel: frustrationLevel,
+        frustrationLevel: frustrationLevelNumber,
         userId: userId,
+        ...(imageUrl && { imageUrl: imageUrl }), // Agregar imageUrl al objeto data si existe
       },
     });
+
     res.redirect('/forum');
   } catch (error) {
     console.error("Error creating post:", error);

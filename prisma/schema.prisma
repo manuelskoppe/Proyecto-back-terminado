@@ -33,6 +33,7 @@ model Post {
   updatedAt         DateTime  @updatedAt
   user              User      @relation(fields: [userId], references: [id])
   comments          Comment[] // One-to-many relation to Comment
+  imageUrl          String?   // Campo opcional para la URL de la imagen
 }
 
 model ForumPost {
