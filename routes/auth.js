@@ -109,6 +109,17 @@ router.get("/register-page", (req, res) => {
   res.render("register", { error: req.flash("error") });
 });
 
-
+// Ruta de logout - Cambia 'auth/logout' a '/auth/logout'
+router.post('/logout', (req, res) => {
+  req.logout(function(err) {
+    if (err) { 
+      return next(err); 
+    }
+    req.session.destroy(() => {
+      res.clearCookie('connect.sid');
+      res.redirect('/');
+    });
+  });
+});
 
 module.exports = router;
