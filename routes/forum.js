@@ -20,10 +20,21 @@ router.get('/', async (req, res) => {
   try {
     const posts = await prisma.post.findMany({
       include: {
-        user: true, // This includes the information of the associated user for each post
+        user: true, // Incluye la información del usuario asociado a cada post
       },
     });
-    res.render('forum', { posts: posts });
+
+    // Formatear la fecha de creación de cada post
+    const formattedPosts = posts.map(post => ({
+      ...post,
+      createdAt: new Date(post.createdAt).toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      })
+    }));
+
+    res.render('forum', { posts: formattedPosts });
   } catch (error) {
     console.error(error);
     res.status(500).send("Error al obtener los posts del foro.");
@@ -136,10 +147,10 @@ router.get('/post/:id', async (req, res) => {
     const post = await prisma.post.findUnique({
       where: { id: postId },
       include: {
-        user: true, // Include the post's author
+        user: true, // Incluir el autor del post
         comments: {
           include: {
-            user: true // Include the author of each comment
+            user: true // Incluir el autor de cada comentario
           }
         },
       },
@@ -149,12 +160,31 @@ router.get('/post/:id', async (req, res) => {
       return res.status(404).send("Post not found");
     }
 
-    res.render('post', { post }); // Ensure you have a 'post' view set up
+    // Formatear la fecha de creación del post
+    post.createdAt = new Date(post.createdAt).toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    });
+
+    // Opcional: Formatear la fecha de creación de cada comentario
+    if (post.comments) {
+      post.comments.forEach(comment => {
+        comment.createdAt = new Date(comment.createdAt).toLocaleDateString('es-ES', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric'
+        });
+      });
+    }
+
+    res.render('post', { post }); // Asegúrate de tener una vista 'post' configurada
   } catch (error) {
     console.error("Error retrieving individual post:", error);
     res.status(500).send("Internal Server Error");
   }
 });
+
 
 /**
  * @swagger
