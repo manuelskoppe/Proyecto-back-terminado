@@ -15,7 +15,7 @@ router.post("/", async (req, res) => {
     });
 
     transporter.sendMail({
-      from: "manuelskoppe@gmail.com",
+      from: process.env.GMAIL_USER,
       to: "lemonadahard@gmail.com",
       subject: "Feedback",
       html: `<h1>Feedback</h1>

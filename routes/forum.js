@@ -44,7 +44,7 @@ router.get('/', async (req, res) => {
 
 /**
  * @swagger
- * /create-post:
+ * /forum/create-post:
  *   post:
  *     summary: Create a new post
  *     description: Allows a user to create a new post with a body and a frustration level.
@@ -76,6 +76,7 @@ router.get('/', async (req, res) => {
  *       500:
  *         description: Internal server error if the post cannot be created
  */
+
 //create-post
 router.post('/create-post', isAuthenticated, upload.single('image'), async (req, res) => {
   const { body, frustrationLevel } = req.body;
@@ -115,7 +116,7 @@ router.post('/create-post', isAuthenticated, upload.single('image'), async (req,
 
 /**
  * @swagger
- * /post/{id}:
+ * /forum/post/{id}:
  *   get:
  *     summary: Retrieve a specific post
  *     description: Get a single post by its ID along with the author and comments.
@@ -131,15 +132,34 @@ router.post('/create-post', isAuthenticated, upload.single('image'), async (req,
  *       200:
  *         description: A single post with author and comments.
  *         content:
- *           text/html:
+ *           application/json:
  *             schema:
- *               type: string
- *               description: HTML page with the post details
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   description: Unique identifier of the post
+ *                 body:
+ *                   type: string
+ *                   description: Content of the post
+ *                 createdAt:
+ *                   type: string
+ *                   format: date
+ *                   description: Creation date of the post
+ *                 user:
+ *                   type: object
+ *                   description: Author of the post
+ *                 comments:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     description: A comment on the post
  *       404:
  *         description: Post not found
  *       500:
  *         description: Internal Server Error
  */
+
 //Recuperar y mostrar un post individual basado en su ID.
 router.get('/post/:id', async (req, res) => {
   const postId = req.params.id;
